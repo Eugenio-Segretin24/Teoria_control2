@@ -1,4 +1,4 @@
-%circuito RLC
+%circuito RLC 1
 clear all;
 X = [0;0]; i=0; t_e=1e-4; tf=0.1;
 t=0:t_e:tf;
