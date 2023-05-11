@@ -1,0 +1,55 @@
+%simulacion_avion-1.m
+clc;clear all;close all;
+w=2; a=0.05; b=5; c=100; dt=0.01;
+tiempo=(50/dt); 
+t=0:dt:50;
+
+alfa=0:dt:50; fi=0:dt:50; hp=0:dt:50;
+fi_p=0:dt:50;
+h=0:dt:50;
+u=linspace(0,dt,tiempo+1);
+
+%condiciones iniciales
+alfa(1)=3; fi(1)=0.01; i=1; color='r';
+u(1)=0.9; 
+
+%Versión linealizada en el equilibrio estable.
+Mat_A=[-a a 0 0; 
+       0 0 1 0;
+       w^2 -w^2 0 0;
+       c 0 0 0];
+Mat_B=[0;0;b*w^2;0]; 
+x0=[0 0 0 0]';
+x=[alfa(1);fi(1);fi_p(1);h(1)];
+while(i<(tiempo+1))   
+%Variables del sistema no lineal
+u(i)=1;
+
+alfa_p=a*(fi(i)-alfa(i));
+fi_pp=-w^2*(fi(i)-alfa(i)-(b*u(i)));
+h_p=c*alfa(i);
+
+%lo que hice fue completar las derivadas que faltaban 
+alfa(i+1)=alfa(i)+dt*alfa_p;
+fi_p(i+1)=fi_p(i)+dt*fi_pp;
+fi(i+1)=fi(i)+dt*fi_p(i);
+h(i+1)=h(i)+dt*h_p;
+
+%Variables del sistema lineal
+alfa1(i)=x(1);fi1(i)=x(2);fi_p1(i)=x(3);h1(i)=x(4);
+
+%Sistema lineal
+xp=Mat_A*(x-x0)+Mat_B*u(i);
+x=x+dt*xp; %calcula el valor de x, a parit del valor actual mas el incremeto h*xp
+i=i+1;
+end
+alfa1(i)=x(1); fi1(i)=x(2); fi_p1(i)=x(3); h1(i)=x(4);
+figure(1);hold on;
+subplot(3,2,1);plot(t,alfa,color);hold on;plot(t,alfa1,'k');
+grid on; title('direccion de vuelo(alfa)');hold on;
+subplot(3,2,2);plot(t,fi,color);hold on;plot(t,fi1,'k');
+grid on;title('direccion de vuelo(fi)');hold on;
+subplot(3,2,3); plot(t,fi_p,color);grid on; title('velocidad de cambio de direccion fi');
+hold on;plot(t,fi_p1,'k');
+subplot(3,2,4);plot(t,h,'or');grid on;title('altura');hold on;plot(t,h1,'+k');
+subplot(3,1,3);plot(t,u,color);grid on;title('Acción de control');xlabel('Tiempo enSeg.');hold on;
